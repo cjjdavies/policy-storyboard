@@ -1,0 +1,343 @@
+---
+title: "Evaluating Scotland's AI Strategy - Ethical considerations for the use of AI for mental health care and research"
+output:
+  flexdashboard::flex_dashboard:
+    storyboard: true
+    source: embed
+    theme:
+      version: 4
+      navbar-bg: "#5D085D"
+---
+.storyboard-nav .sbframelist {
+    margin: 0 1.5em;
+}
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE)
+library(flexdashboard)
+library(echarts4r)
+library(visNetwork)
+library(readr)
+library(timevis)
+library(vistime)
+library(ggplot2)
+library(lubridate)
+library(kableExtra)
+library(plotly)
+library(stringr)
+
+# Adapted from https://benalexkeen.com/creating-a-timeline-graphic-using-r-and-ggplot2/
+# For Shiny https://www.r-bloggers.com/2019/06/interactive-network-visualization-with-r/
+
+# Create a dataframe
+timeline <- data.frame(Year = c(rep(c(2019), times = 2),
+                                rep(c(2020), times = 3),
+                                rep(c(2021), times = 6),
+                                rep(c(2022), times = 4)),
+                       Months = c(10, 11, 9, 9, 11, 3, 6, 7, 7, 9, 11, 2, 2, 3, 7),
+                       Days = c(30, 27, 7, 8, 3, 22, 30, 5, 7, 5, 12, 1, 11, 30, 18),
+                       Milestones = c("Steering Committee Workshop 1",
+                                      "Steering Committee workshop 2",
+                                      "The AI Of The Possible: Developing Scotland’s Artificial Intelligence (AI) Strategy",
+                                      "The AI of The Possible: Developing Scotland’s Artificial Intelligence (AI) Strategy, Public Engagement Report",
+                                      "Key findings from the Working Group discussions",
+                                      "Scotland’s AI Strategy",
+                                      "First 100 Days",
+                                      "AI Alliance Engagement Workshop",
+                                      "The Scottish AI Strategy & Playbook Sessions Report",
+                                      "The Scottish AI Playbook Personas Workshop Report",
+                                      "Scottish AI Playbook: User requirements mapping summary report",
+                                      "Ensuring Full Participation in the Delivery of Scotland’s AI Strategy",
+                                      "Digital, Data and AI Skills sector in Scotland",
+                                      "State of AI Report",
+                                      "Develop ethical and regulatory frameworks for AI in Scotland"),
+                       Milestones_abbrev = c("Steering Committee Workshop 1",
+                                      "Steering Committee workshop 2",
+                                      "The AI Of The Possible",
+                                      "The AI of The Possible 2",
+                                      "Working Group Discussions",
+                                      "Scotland’s AI Strategy",
+                                      "First 100 Days",
+                                      "AI Alliance Engagement Workshop",
+                                      "Strategy & Playbook Sessions Report",
+                                      "Personas Workshop Report",
+                                      "User Requirements Mapping Summary Report",
+                                      "Participation Strategy",
+                                      "Digital, Data and AI Skills",
+                                      "State of AI Report",
+                                      "Ethical and Regulatory Frameworks"),
+                       Type = c("Workshop Report",
+                                "Workshop Report",
+                                "Consultation Report",
+                                "Consultation Report",
+                                "Report",
+                                "Strategy",
+                                "Key Milestone",
+                                "Workshop Report",
+                                "Feedback Report",
+                                "Workshop Report",
+                                "Report",
+                                "Case Study",
+                                "Report",
+                                "Report",
+                                "Working Group"),
+                       Stage = c("Development",
+                                 "Development",
+                                 "Development",
+                                 "Development",
+                                 "Development",
+                                 "Strategy Launch",
+                                 "Delivery",
+                                 "Delivery",
+                                 "Delivery",
+                                 "Delivery",
+                                 "Delivery",
+                                 "Delivery",
+                                 "Delivery",
+                                 "Update",
+                                 "Implementation"),
+                       Status = c("Complete",
+                                  "Complete",
+                                  "Complete",
+                                  "Complete",
+                                  "Complete",
+                                  "Complete",
+                                  "Complete",
+                                  "Complete",
+                                  "Complete",
+                                  "Complete",
+                                  "Complete",
+                                  "Complete",
+                                  "Complete",
+                                  "Complete",
+                                  "Delayed"))
+
+# Wrap long labels
+timeline$Milestones_abbrev = str_wrap(timeline$Milestones_abbrev, width = 20)
+
+# Define the date format
+timeline$date <- with(timeline, ymd(sprintf('%04d%02d%02d', timeline$Year, timeline$Months, timeline$Days)))
+
+# Put the dates in order
+timeline <- timeline[with(timeline, order(date)), ]
+
+# Have a look at the data
+head(timeline)
+
+# Convert the Stage to an ordinal categorical variable, in order of progress ranging from “Development” to “Implementation”. Define hexadecimal colour values to associate with these statuses.
+
+stage_levels <- c("Development", "Strategy Launch", "Delivery", "Update", "Implementation")
+stage_colors <- c("#648FFF", "#785EF0", "#DC267F", "#FE6100", "#FFB000")
+
+timeline$Stage <- factor(timeline$Stage, levels=stage_levels, ordered=TRUE)
+
+# Vary the height and direction of the lines, because otherwise the text for the milestones will clash.
+
+# Assign the lines and the heights for milestones within the same month to be the same, so we only change the height and position values.
+
+# Order the data frame by date and status, so that the most critical status is plotted last and the colours displayed are for the most critical milestone status.
+
+positions <- c(0.5, -0.5, 1.0, -1.0, 1.5, -1.5, 2.0)
+
+directions <- c(1, -1)
+
+line_pos <- data.frame(
+    "date"=unique(timeline$date),
+    "position"=rep(positions, length.out=length(unique(timeline$date))),
+    "direction"=rep(directions, length.out=length(unique(timeline$date))))
+
+timeline <- merge(x=timeline, y=line_pos, by="date", all = TRUE)
+
+head(timeline)
+
+# If there are multiple milestones for a given month, slightly alter their positions (slightly higher if above our timeline and slightly lower if below our timeline).
+
+# Do a cumulative count of individual dates to check if we have multiple milestones for a given month.
+
+text_offset <- 0.10
+
+timeline$month_count <- ave(timeline$date==timeline$date, timeline$date, FUN=cumsum)
+timeline$text_position <- (timeline$month_count * text_offset * timeline$direction) + timeline$position
+
+# Some of the text labels are in the wrong position, so need to be manually adjusted until I can figure out a better way to correct them
+timeline$text_position <- replace(timeline$text_position, timeline$text_position == 0.4, 0.6)
+timeline$text_position <- replace(timeline$text_position, timeline$text_position == -0.4, -0.6)
+timeline$text_position <- replace(timeline$text_position, timeline$text_position == 0.9, 1.1)
+timeline$text_position <- replace(timeline$text_position, timeline$text_position == -0.9, -1.1)
+timeline$text_position <- replace(timeline$text_position, timeline$text_position == 1.4, 1.6)
+timeline$text_position <- replace(timeline$text_position, timeline$text_position == -1.4, -1.6)
+timeline$text_position <- replace(timeline$text_position, timeline$text_position == 1.9, 2.1)
+
+head(timeline)
+
+# To display all months on our timelines, not just the months with events, create a data frame containing months.
+
+# Start 2 months before the first milestone and end 2 months after the last milestone for a little bit of a buffer.
+
+month_buffer <- 2
+
+month_date_range <- seq(min(timeline$date) - months(month_buffer), max(timeline$date) + months(month_buffer), by='month')
+month_format <- format(month_date_range, '%b')
+month_df <- data.frame(month_date_range, month_format)
+
+# Do the same for the years that we also want to display.
+
+# Display years for which there is a December/January crossover, this is what the intersect line is doing.
+
+year_date_range <- seq(min(timeline$date) - months(month_buffer), max(timeline$date) + months(month_buffer), by='year')
+
+year_date_range <- as.Date(
+    intersect(
+        ceiling_date(year_date_range, unit="year"),
+        floor_date(year_date_range, unit="year")
+    ),  origin = "1970-01-01"
+)
+
+year_format <- format(year_date_range, '%Y')
+
+year_df <- data.frame(year_date_range, year_format)
+
+#### PLOT ####
+
+timeline_plot <- ggplot(timeline,
+                        aes(x = date,
+                            y = 0,
+                            col = Stage,
+                            label = Milestones_abbrev))
+
+timeline_plot <- timeline_plot +
+  labs(col = "Milestones")
+
+timeline_plot <- timeline_plot +
+  scale_color_manual(values = stage_colors,
+                     labels = stage_levels,
+                     drop = FALSE)
+
+timeline_plot <- timeline_plot +
+  theme_classic()
+
+# Plot horizontal black line for timeline
+timeline_plot <- timeline_plot +
+  geom_hline(yintercept = 0,
+             color = "black",
+             size = 0.3)
+
+# Plot vertical segment lines for milestones
+timeline_plot <- timeline_plot +
+  geom_segment(data = timeline[timeline$month_count == 1,],
+               aes(y = position,
+                   yend = 0,
+                   xend = date),
+               color = 'black',
+               size = 0.2)
+
+# Plot scatter points at zero and date
+timeline_plot <- timeline_plot +
+  geom_point(aes(y = 0),
+             size = 3)
+
+# Don't show axes, appropriately position legend
+timeline_plot <- timeline_plot +
+  theme(axis.line.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.line.x = element_blank(),
+        legend.position = "bottom")
+
+# Show text for each month
+timeline_plot <- timeline_plot +
+  geom_text(data = month_df,
+            aes(x = month_date_range,
+                y = -0.1,
+                label = month_format),
+            size = 3,
+            vjust = 0.5,
+            color = 'black',
+            angle = 90)
+
+# Show year text
+timeline_plot <- timeline_plot +
+  geom_text(data = year_df,
+            aes(x = year_date_range,
+                y = -0.2,
+                label = year_format,
+                fontface = "bold"),
+            size = 4,
+            color = 'black')
+
+# Show text for each milestone
+timeline_plot <- timeline_plot +
+  geom_text(aes(y = text_position,
+                label = Milestones_abbrev,
+                text = paste0("Title: ", Milestones,
+                              '</br></br>',
+                              "Type: ", Type,
+                              '</br>',
+                              "Strategy Stage: ", Stage,
+                              '</br>',
+                              "Status: ", Status)),
+            size = 4)
+
+
+
+```
+
+### Timeline of Strategy Development and Progress
+
+```{r timeline}
+ggplotly(timeline_plot, tooltip = "text")
+
+```
+
+***
+
+Information and navigation
+
+- This timeline shows the various activities and outputs associated with the launch of Scotland's AI Strategy in March 2022, and over the past few months to date
+
+- Hovering the cursor over the text will reveal summary information about each activity and output
+
+- To zoom in, use the '+' icon at the top right, or click and drag the cursor across the area of interest
+
+- To zoom out, use the '-' icon at the top right, or double click on the image
+
+- Clicking one any of the 'Milestones' types in the legend will remove those types from the timeline allowing you to focus on specific types; clicking twice will remove all other types from the timeline
+
+### Network Diagram
+```{r network-diagram, echo=FALSE}
+node_list <- read.csv("/home/chantel/pCloudDrive/MSc Health Data Science/PU5919 Evaluating Policy Effects in Practice/Network Analysis data - manual/node_list.csv",
+                      header = T,
+                      sep = ",",
+                      stringsAsFactors = TRUE)
+
+edge_list <- read.csv("/home/chantel/pCloudDrive/MSc Health Data Science/PU5919 Evaluating Policy Effects in Practice/Network Analysis data - manual/edge_list.csv",
+                      header = T,
+                      sep = ",")
+
+visNetwork(node_list, edge_list, height = "500px", width = "100%") %>% 
+  visEdges(arrows = "to",
+           width = "weight") %>% 
+  visGroups(groupname = "AI", shape = "ellipse", color = list(border = "#DCE319FF", background = "#FDE725FF")) %>% 
+  visGroups(groupname = "Ethics", shape = "ellipse", color = list(border = "#B8DE29FF", background = "#DCE319FF")) %>% 
+  visGroups(groupname = "Ethics & AI", shape = "ellipse", color = list(border = "#95D840FF", background = "#B8DE29FF")) %>% 
+  visGroups(groupname = "Ethics, Mental Health & AI", shape = "ellipse", color = list(border = "#73D055FF", background = "#95D840FF")) %>%
+  visGroups(groupname = "Mental Health", shape = "rectangle", color = list(border = "#55C667FF", background = "#73D055FF")) %>%
+  visGroups(groupname = "None", shape = "ellipse", color = list(border = "#3CBB75FF", background = "#55C667FF")) %>% 
+  visClusteringByGroup(groups = c("AI",
+                                  "Ethics",
+                                  "Ethics & AI",
+                                  "Ethics, Mental Health & AI",
+                                  "Mental Health",
+                                  "None")) %>%
+  visInteraction(navigationButtons = TRUE) %>% # navigation buttons for moving around the screen
+  visPhysics(solver = "forceAtlas2Based", # separates the nodes from each other to allow more space
+             forceAtlas2Based = list(gravitationalConstant = -50))
+```
+
+### Mental Health in Scotland
+
+Situation of mental health and indicators
