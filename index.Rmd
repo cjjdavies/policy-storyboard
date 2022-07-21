@@ -8,9 +8,6 @@ output:
       version: 4
       navbar-bg: "#5D085D"
 ---
-.storyboard-nav .sbframelist {
-    margin: 0 1.5em;
-}
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, message = FALSE)
