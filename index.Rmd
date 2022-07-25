@@ -1,28 +1,63 @@
 ---
-title: "Evaluating Scotland's AI Strategy - Ethical considerations for the use of AI for mental health care and research"
+title: "Evaluating Scotland's AI Strategy - Ethical frameworks for the use of AI for mental health care and research"
 output:
   flexdashboard::flex_dashboard:
     storyboard: true
     source: embed
-    theme:
+    theme: 
       version: 4
       navbar-bg: "#5D085D"
 ---
+<style>
+
+.section.sidebar {
+  font-family: Roboto;
+  font-size: 1rem;
+}
+
+.storyboard-nav .sbframelist ul li.active {
+  font-family: Roboto;
+  font-size: 1rem;
+  font-weight: 600;
+  background: #5D085D;
+}
+
+.storyboard-nav .sbframelist ul li:not(.active) {
+  font-family: Roboto;
+  font-size: 1rem;
+}
+
+.storyboard-nav .sbframelist ul li:hover {
+  color: white;
+  font-family: Roboto;
+  font-size: 1rem;
+  font-weight: 600;
+  background: #758A0C;
+}
+
+p {
+  font-family: Roboto;
+  font-size: 1rem;
+}
+
+</style>
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, message = FALSE)
+
+# Load packages
+library(tidyverse)
 library(flexdashboard)
-library(echarts4r)
 library(visNetwork)
 library(readr)
-library(timevis)
-library(vistime)
 library(ggplot2)
 library(lubridate)
 library(kableExtra)
 library(plotly)
 library(stringr)
+library(DT)
 
+### TIMELINE CREATION ###
 # Adapted from https://benalexkeen.com/creating-a-timeline-graphic-using-r-and-ggplot2/
 # For Shiny https://www.r-bloggers.com/2019/06/interactive-network-visualization-with-r/
 
@@ -279,11 +314,208 @@ timeline_plot <- timeline_plot +
                               "Status: ", Status)),
             size = 4)
 
+### NETWORK DIAGRAM ###
 
+# Creating a network diagram using the policy document covers for nodes
+# I took screenshots of the front covers of the pdfs and saved them as .png files on a localhost directory, then saved the location as 'path_to_images'
+path_to_images <- "http://localhost/network-images/"
+
+# The easiest way I could think of doing this was to recreate the two dataframes with the image titles and labels and edge connections
+# I removed the two policies that did not mention any of the key topics of interest
+nodes_policy_covers <- data.frame("id" = 1:22,
+                       shape = "image",
+                       image = paste0(path_to_images,
+                                      c("scotlands_ai_strategy.png",
+                                        "AI_sector_deal.png",
+                                        "centre_for_data_ethics_and_innovation.png",
+                                        "ALTAI.png",
+                                        "life_science_strategy_for_scotland.png",
+                                        "United_Nations_Convention_onthe_Rights_ofthe_Child.png",
+                                        "scotlands_digital_healthcare_strategy_2021.png",
+                                        "gender_paygap_action_plan.png",
+                                        "cyber_resilience_strategy.png",
+                                        "transforming_places_together.png",
+                                        "scottish_technology_ecosystem_review.png",
+                                        "iCAIRD.png",
+                                        "infrastructure_investment_plan.png",
+                                        "digital_strategy_2021.png",
+                                        "vision_for_trade.png",
+                                        "UNICEFs_policy_guidance_on_AI_for_children.png",
+                                        "high-level_expert_group_on_AI.png",
+                                        "national_ai_strategy.png",
+                                        "fostering_a_european_approach_to_AI.png",
+                                        "how_the_eu_can_achieve_legally_trustworthy_ai.png",
+                                        "the_AI_act.png",
+                                        "OECD_AI_in_society.png")),
+                       label = c("Scotland’s AI Strategy",
+                                 "AI Sector Deal",
+                                 "Centre for Data Ethics and Innovation",
+                                 "The Assessment List on Trustworthy AI",
+                                 "Life Sciences Strategy for Scotland 2025 Vision",
+                                 "The UN Convention on the Rights of the Child (UNCRC)",
+                                 "Scotland’s Digital Health and Care Strategy 2021",
+                                 "A Fairer Scotland for Women: Gender Pay Gap Action Plan",
+                                 "Cyber Resilient Scotland: strategic framework",
+                                 "Transforming Places Together: digital strategy for planning",
+                                 "Scottish technology ecosystem: review",
+                                 "The Industrial Centre for Artificial Intelligence Research in Digital Diagnostics (iCAIRD)",
+                                 "Infrastructure Investment Plan for Scotland 2021-22 to 2025-26",
+                                 "Digital Strategy for Scotland 2021",
+                                 "Scotland’s Vision for Trade",
+                                 "UNICEF’s Policy Guidance on AI for Children",
+                                 "High-level expert group on artificial intelligence",
+                                 "National AI Strategy",
+                                 "Fostering a European Approach to AI",
+                                 "How the EU Can Achieve Legally Trusthworthy AI",
+                                 "The AI Act",
+                                 "OECD AI in Society"),
+                       group = c("Ethics, Mental Health & AI",
+                                 "Ethics",
+                                 "Ethics & AI",
+                                 "Ethics & AI",
+                                 "Mental Health",
+                                 "Ethics, Mental Health & AI",
+                                 "AI",
+                                 "Ethics & AI",
+                                 "Ethics, Mental Health & AI",
+                                 "AI",
+                                 "AI",
+                                 "Ethics, Mental Health & AI",
+                                 "Ethics & AI",
+                                 "Ethics, Mental Health & AI",
+                                 "Ethics, Mental Health & AI",
+                                 "Ethics & AI",
+                                 "Ethics & AI",
+                                 "Ethics & AI",
+                                 "Ethics & AI",
+                                 "Ethics & AI",
+                                 "AI",
+                                 "AI"))
+
+# Recreate the network connections
+edges_policy_covers <- data.frame(from = c(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 10, 16, 17, 18),
+                                  to = c(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 1, 1, 1, 1),
+                                  value = c(10, 2, 450, 144, 2, 13, 1, 9, 4, 1, 7, 0, 65, 30, 1043, 1463, 673, 1221, 2740, 1, 1, 1, 4, 3, 4))
+
+# Create a network plot using the nodes and edges data created above
+# Set the dimensions
+# Remove borders from around the images and increase font size
+# Set arrows leading from the strategy to all other documents
+mynetworkid <- visNetwork(nodes_policy_covers,
+                          edges_policy_covers,
+                          height = "500px",
+                          width = "100%") %>% 
+  visNodes(shapeProperties = list(useBorderWithImage = FALSE),
+           font = "30px") %>%
+  visEdges(arrows = list(to = list(enabled = TRUE, scaleFactor = 2)),
+           color = stage_colors) %>% 
+  visInteraction(navigationButtons = TRUE) %>% 
+  visPhysics(solver = "forceAtlas2Based", # separates the nodes from each other to allow more space
+             forceAtlas2Based = list(gravitationalConstant = -100)) %>% 
+  visOptions(highlightNearest = list(hover = T), 
+             selectedBy = "group", nodesIdSelection = TRUE) %>% 
+  visLayout(randomSeed = 2)
+
+### Policy data table ###
+
+# Create a dataframe of cover images, hyperlinks to the policies, and the themes covered by each
+policies_table <- data.frame(
+  cover_image = c('<img src="http://localhost/network-images/scotlands_ai_strategy.png" height = "80vh"></img',
+                  '<img src="http://localhost/network-images/AI_sector_deal.png" height = "80vh"></img',
+                  '<img src="http://localhost/network-images/centre_for_data_ethics_and_innovation.png" height = "80vh"></img',
+                  '<img src="http://localhost/network-images/ALTAI.png" height = "80vh"></img',
+                  '<img src="http://localhost/network-images/life_science_strategy_for_scotland.png" height = "80vh"></img',
+                  '<img src="http://localhost/network-images/United_Nations_Convention_onthe_Rights_ofthe_Child.png" height = "80vh"></img',
+                  '<img src="http://localhost/network-images/scotlands_digital_healthcare_strategy_2021.png" height = "80vh"></img',
+                  '<img src="http://localhost/network-images/gender_paygap_action_plan.png" height = "80vh"></img',
+                  '<img src="http://localhost/network-images/cyber_resilience_strategy.png" height = "80vh"></img',
+                  '<img src="http://localhost/network-images/transforming_places_together.png" height = "80vh"></img',
+                  '<img src="http://localhost/network-images/scottish_technology_ecosystem_review.png" height = "80vh"></img',
+                  '<img src="http://localhost/network-images/iCAIRD.png" height = "80vh"></img',
+                  '<img src="http://localhost/network-images/infrastructure_investment_plan.png" height = "80vh"></img',
+                  '<img src="http://localhost/network-images/digital_strategy_2021.png" height = "80vh"></img',
+                  '<img src="http://localhost/network-images/vision_for_trade.png" height = "80vh"></img',
+                  '<img src="http://localhost/network-images/UNICEFs_policy_guidance_on_AI_for_children.png" height = "80vh"></img',
+                  '<img src="http://localhost/network-images/high-level_expert_group_on_AI.png" height = "80vh"></img',
+                  '<img src="http://localhost/network-images/national_ai_strategy.png" height = "80vh"></img',
+                  '<img src="http://localhost/network-images/fostering_a_european_approach_to_AI.png" height = "80vh"></img',
+                  '<img src="http://localhost/network-images/how_the_eu_can_achieve_legally_trustworthy_ai.png" height = "80vh"></img',
+                  '<img src="http://localhost/network-images/the_AI_act.png" height = "80vh"></img',
+                  '<img src="http://localhost/network-images/OECD_AI_in_society.png" height = "80vh"></img'),
+  Policy_title = c('<a href="https://www.scotlandaistrategy.com/">Scotland’s AI Strategy</a>',
+                   '<a href="https://www.gov.uk/government/publications/artificial-intelligence-sector-deal/ai-sector-deal">AI Sector Deal</a>',
+                   '<a href="https://www.gov.uk/government/organisations/centre-for-data-ethics-and-innovation">Centre for Data Ethics and Innovation</a>',
+                   '<a href="https://ec.europa.eu/newsroom/dae/document.cfm?doc_id=68342">The Assessment List on Trustworthy AI</a>',
+                   '<a href="https://www.lifesciencesscotland.com/wp-content/uploads/2017/08/Life-Sciences-Strategy-for-Scotland-2025-VisionFINALlow-res.pdf">Life Sciences Strategy for Scotland 2025 Vision</a>',
+                   '<a href="https://www.unicef.org.uk/wp-content/uploads/2010/05/UNCRC_united_nations_convention_on_the_rights_of_the_child.pdf">The UN Convention on the Rights of the Child (UNCRC)</a>',
+                   '<a href="https://www.gov.scot/binaries/content/documents/govscot/publications/strategy-plan/2021/10/scotlands-digital-health-care-strategy/documents/enabling-connecting-empowering-care-digital-age/enabling-connecting-empowering-care-digital-age/govscot%3Adocument/enabling-connecting-empowering-care-digital-age.pdf">Scotland’s Digital Health and Care Strategy 2021</a>',
+                   '<a href="https://www.gov.scot/binaries/content/documents/govscot/publications/strategy-plan/2019/03/fairer-scotland-women-gender-pay-gap-action-plan/documents/fairer-scotland-women-gender-pay-gap-action-plan/fairer-scotland-women-gender-pay-gap-action-plan/govscot%3Adocument/fairer-scotland-women-gender-pay-gap-action-plan.pdf">A Fairer Scotland for Women: Gender Pay Gap Action Plan</a>',
+                   '<a href="https://www.gov.scot/binaries/content/documents/govscot/publications/strategy-plan/2021/02/strategic-framework-cyber-resilient-scotland/documents/strategic-framework-cyber-resilient-scotland/strategic-framework-cyber-resilient-scotland/govscot%3Adocument/strategic-framework-cyber-resilient-scotland.pdf">Cyber Resilient Scotland: strategic framework</a>',
+                   '<a href="https://www.gov.scot/binaries/content/documents/govscot/publications/strategy-plan/2020/11/transforming-places-together-scotlands-digital-strategy-planning/documents/transforming-places-together-scotlands-digital-strategy-planning/transforming-places-together-scotlands-digital-strategy-planning/govscot%3Adocument/transforming-places-together-scotlands-digital-strategy-planning.pdf">Transforming Places Together: digital strategy for planning</a>',
+                   '<a href="https://www.gov.scot/binaries/content/documents/govscot/publications/independent-report/2020/08/scottish-technology-ecosystem-review/documents/scottish-technology-ecosystem-review/scottish-technology-ecosystem-review/govscot%3Adocument/scottish-technology-ecosystem-review.pdf">Scottish technology ecosystem: review</a>',
+                   '<a href="https://icaird.com/">The Industrial Centre for Artificial Intelligence Research in Digital Diagnostics (iCAIRD)</a>',
+                   '<a href="https://www.gov.scot/binaries/content/documents/govscot/publications/strategy-plan/2021/02/national-mission-local-impact-infrastructure-investment-plan-scotland-2021-22-2025-26/documents/national-mission-local-impact-infrastructure-investment-plan-scotland-2021-22-2025-26/national-mission-local-impact-infrastructure-investment-plan-scotland-2021-22-2025-26/govscot%3Adocument/national-mission-local-impact-infrastructure-investment-plan-scotland-2021-22-2025-26.pdf">Infrastructure Investment Plan for Scotland 2021-22 to 2025-26</a>',
+                   '<a href="https://www.gov.scot/binaries/content/documents/govscot/publications/strategy-plan/2021/03/a-changing-nation-how-scotland-will-thrive-in-a-digital-world/documents/a-changing-nation-pdf-version/a-changing-nation-pdf-version/govscot%3Adocument/DigiStrategy.FINAL.APR21.pdf">Digital Strategy for Scotland 2021</a>',
+                   '<a href="https://www.gov.scot/binaries/content/documents/govscot/publications/strategy-plan/2021/01/scottish-government-vision-trade/documents/scotlands-vision-trade/scotlands-vision-trade/govscot%3Adocument/scotlands-vision-trade.pdf">Scotland’s Vision for Trade</a>',
+                   '<a href="https://www.unicef.org/globalinsight/reports/policy-guidance-ai-children">UNICEF’s Policy Guidance on AI for Children</a>',
+                   '<a href="https://digital-strategy.ec.europa.eu/en/policies/expert-group-ai">High-level expert group on artificial intelligence</a>',
+                   '<a href="https://www.gov.uk/government/publications/national-ai-strategy">National AI Strategy</a>',
+                   '<a href="https://ec.europa.eu/transparency/documents-register/api/files/COM(2021)205_0/de00000001034487?rendition=false">Fostering a European Approach to AI</a>',
+                   '<a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3899991">How the EU Can Achieve Legally Trusthworthy AI</a>',
+                   '<a href="https://artificialintelligenceact.eu/the-act/">The AI Act</a>',
+                   '<a href="https://www.oecd.org/publications/artificial-intelligence-in-society-eedfee77-en.htm">OECD AI in Society</a>'),
+  theme = c("Ethics, Mental Health & AI",
+            "Ethics",
+            "Ethics & AI",
+            "Ethics & AI",
+            "Mental Health",
+            "Ethics, Mental Health & AI",
+            "AI",
+            "Ethics & AI",
+            "Ethics, Mental Health & AI",
+            "AI",
+            "AI",
+            "Ethics, Mental Health & AI",
+            "Ethics & AI",
+            "Ethics, Mental Health & AI",
+            "Ethics, Mental Health & AI",
+            "Ethics & AI",
+            "Ethics & AI",
+            "Ethics & AI",
+            "Ethics & AI",
+            "Ethics & AI",
+            "AI",
+            "AI"))
+
+# Create a datatable. removing row names, supplying new column names, adding a left-aligned caption, changing the font using a javascript snippet, left-aligning the column headings, order by the 'Key Theme' column, include all 22 policies in one view, and ensure image links and hyperlinks can be access with the 'escape = FALSE' argument.
+
+policyDT <- datatable(policies_table,
+          rownames = FALSE,
+          colnames = c(NULL, "Policy Title", "Key Theme"),
+          caption = (htmltools::tags$caption(
+            style = 'caption-side: top; text-align: left;',
+            "Table 1: Policies, strategies and organisations referenced within Scotland's AI Strategy with references to ethics, AI and mental health")),
+          options = list(
+            initComplete = JS(
+              "function(settings, json) {",
+              "$('body').css({'font-family': 'Calibri'});",
+              "}"),
+            columnDefs = list(list(className = 'dt-left', targets = "_all")),
+            order = list(list(2, 'asc')),
+            pageLength = 22),
+          escape = FALSE)
 
 ```
 
-### Timeline of Strategy Development and Progress
+Sidebar {.sidebar}
+------
+![](scotlands_ai_strategy.png){width=100%}
+
+This storyboard explains the development of Scotland's AI Strategy, explores the numerous policies underpinning the strategy.
+
+It discusses mental health and ethical frameworks.
+
+### Strategy Development and Progress
 
 ```{r timeline}
 ggplotly(timeline_plot, tooltip = "text")
@@ -304,8 +536,9 @@ Information and navigation
 
 - Clicking one any of the 'Milestones' types in the legend will remove those types from the timeline allowing you to focus on specific types; clicking twice will remove all other types from the timeline
 
-### Network Diagram
-```{r network-diagram, echo=FALSE}
+### Network diagram showing the relationships between Scotland's AI Strategy and other policies
+
+```{r network-diagram}
 node_list <- read.csv("/home/chantel/pCloudDrive/MSc Health Data Science/PU5919 Evaluating Policy Effects in Practice/Network Analysis data - manual/node_list.csv",
                       header = T,
                       sep = ",",
@@ -318,22 +551,56 @@ edge_list <- read.csv("/home/chantel/pCloudDrive/MSc Health Data Science/PU5919 
 visNetwork(node_list, edge_list, height = "500px", width = "100%") %>% 
   visEdges(arrows = "to",
            width = "weight") %>% 
-  visGroups(groupname = "AI", shape = "ellipse", color = list(border = "#DCE319FF", background = "#FDE725FF")) %>% 
-  visGroups(groupname = "Ethics", shape = "ellipse", color = list(border = "#B8DE29FF", background = "#DCE319FF")) %>% 
-  visGroups(groupname = "Ethics & AI", shape = "ellipse", color = list(border = "#95D840FF", background = "#B8DE29FF")) %>% 
-  visGroups(groupname = "Ethics, Mental Health & AI", shape = "ellipse", color = list(border = "#73D055FF", background = "#95D840FF")) %>%
-  visGroups(groupname = "Mental Health", shape = "rectangle", color = list(border = "#55C667FF", background = "#73D055FF")) %>%
-  visGroups(groupname = "None", shape = "ellipse", color = list(border = "#3CBB75FF", background = "#55C667FF")) %>% 
+  visGroups(groupname = "AI", shape = "square", color = list(border = "#648FFF", background = "#648FFF")) %>% 
+  visGroups(groupname = "Ethics & AI", shape = "square", color = list(border = "#DC267F", background = "#DC267F")) %>% 
+  visGroups(groupname = "Ethics, Mental Health & AI", shape = "square", color = list(border = "#FE6100", background = "#FE6100")) %>%
+  visGroups(groupname = "Mental Health", shape = "square", color = list(border = "#FFB000", background = "#FFB000")) %>%
   visClusteringByGroup(groups = c("AI",
-                                  "Ethics",
                                   "Ethics & AI",
                                   "Ethics, Mental Health & AI",
-                                  "Mental Health",
-                                  "None")) %>%
+                                  "Mental Health")) %>%
   visInteraction(navigationButtons = TRUE) %>% # navigation buttons for moving around the screen
   visPhysics(solver = "forceAtlas2Based", # separates the nodes from each other to allow more space
-             forceAtlas2Based = list(gravitationalConstant = -50))
+             forceAtlas2Based = list(gravitationalConstant = -50)) %>% 
+  visOptions(highlightNearest = list(enabled = T, hover = T))
 ```
+
+***
+
+Information and navigation
+
+- This network diagram shows the relationships between Scotland's AI Strategy and the various policies and strategies it references, based on the extent of 'relatedness' in terms of quantity of content discussing one or all of the themes of ethics, AI and mental health
+
+- There are navigation buttons in the left bottom corner, which will allow you to move the diagram around the screen. Alternatively you can click the left mouse buttong and drag the diagram around the screen.
+
+- The buttons in the bottom right of the screen will allow you to resize the diagram to fit your screen, and zoom in and out with the plus and minus buttons. You can also zoom in and out using the mouse wheel.
+
+- Each of the coloured squares shows documents 'clustered' according to which of the themes they address, with the exception of the Life Science Strategy for Scotland, which only includes mental health and none of the other themes.
+
+- Double-clicking with the left mouse button on one of the clusters will open that cluster and allow you to see the various policies and other documents linked to Scotland's AI Strategy. Clusters can be closed by double-clicking with the left mouse button on any of the cluster members.
+
+- Within clusters, some squares will be bigger than others which indicates those documents have a greater quantity of content discussing particular themes. For example, within the 'Ethics & AI' cluster, the document 'How the EU can Achieve Legally Trustworthy AI' mentions ethics and AI more than the 'Infrastructure Investment Plan'.
+
+- Below the navigation buttons in the bottom left corner, the 'Reinitialize clustering' button will close all clusters.
+
+- To find out more about each of the linked policies, navigate to the Policy Reference Table tab at the top of the storyboard.
+
+### Policy Reference Table
+
+```{r policy-table}
+policyDT
+
+```
+
+***
+
+Information and navigation
+
+- This table contains all the policies and strategies referenced in the network diagram, with direct links to the documents and websites in the Policy Title column.
+
+- Documents are organised according to Key Theme, but can be organised by policy title.
+
+- The search box allows for text searches.
 
 ### Mental Health in Scotland
 
