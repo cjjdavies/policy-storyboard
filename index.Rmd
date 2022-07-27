@@ -56,6 +56,7 @@ library(kableExtra)
 library(plotly)
 library(stringr)
 library(DT)
+library(DiagrammeR)
 
 ### TIMELINE CREATION ###
 # Adapted from https://benalexkeen.com/creating-a-timeline-graphic-using-r-and-ggplot2/
@@ -515,6 +516,14 @@ This storyboard explains the development of Scotland's AI Strategy, explores the
 
 It discusses mental health and ethical frameworks.
 
+Welcome to this storyboard, which has been designed to provide an overview of the ethical frameworks in place or in development to guide the use of artificial intelligence in mental health care and research.
+
+Should AI be used for this purpose?
+
+### Mental Health in Sotland
+
+Situation of mental health and indicators
+
 ### Strategy Development and Progress
 
 ```{r timeline}
@@ -535,6 +544,42 @@ Information and navigation
 - To zoom out, use the '-' icon at the top right, or double click on the image
 
 - Clicking one any of the 'Milestones' types in the legend will remove those types from the timeline allowing you to focus on specific types; clicking twice will remove all other types from the timeline
+
+### Apps for mental health care {data-commentary-width=400}
+
+```{r}
+mermaid("
+graph TB
+    A(Mental Health Apps) --> B(UB-OK/ Alli-chat)
+    B --> C(Mental & physical <br> health)
+    C --> D(AI-based)
+    C --> E(Therapeutic <br> conversation)
+    D --> F(Natural <br> language <br> understanding?)
+    A --> G(Daylight)
+    G --> H(Worry <br> Anxiety <br> Management of <br> General Anxiety Disorder)
+    H --> I(Fully automated)
+    H --> J(Based on CBT)
+    A --> K(Sleepio)
+    K --> L(Insomnia)
+    L --> M(AI-based)
+    L --> N(Tailored CBT for <br> insomnia: CBT-I)
+    N --> O(Six-week self-help <br> programme)
+    J --> P(Six-week self-help <br> programme)
+    E --> Q(Ongoing interaction)
+")
+```
+
+***
+
+This diagram provides a summary of three apps for supporting different aspects of good mental health in the general population.
+
+The <a href="https://www.ubok.app/">UB-OK</a> app uses AI to provide therapeutic conversations on an ongoing basis. Its predecessor, Alli-chat, used an algorithm known as natural language understanding - a form of AI that aims to create 'natural' conversation by recognising speech in the form of text and generating an appropriate response.
+
+The apps <a href="https://www.trydaylight.com/">Daylight</a> and <a href="https://onboarding.sleepio.com/sleepio/nhs-sleepio/171#1/1">Sleepio</a> are both freely available for anyone in Scotland. Both apps are promoted by NHS Scotland and use Cognitive Behavioural Therapy approaches over a six-week period to help people manage anxiety and sleep difficulties respectively.
+
+Sleepio is based on AI to deliver tailored guidance on improving sleep patterns.
+
+Daylight has a 'fully automated' approach to providing guided CBT for worry, anxiety and management of General Anxiety Disorder.
 
 ### Network diagram showing the relationships between Scotland's AI Strategy and other policies
 
@@ -601,7 +646,3 @@ Information and navigation
 - Documents are organised according to Key Theme, but can be organised by policy title.
 
 - The search box allows for text searches.
-
-### Mental Health in Scotland
-
-Situation of mental health and indicators
