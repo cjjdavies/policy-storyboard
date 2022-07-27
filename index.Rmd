@@ -581,7 +581,7 @@ Sleepio is based on AI to deliver tailored guidance on improving sleep patterns.
 
 Daylight has a 'fully automated' approach to providing guided CBT for worry, anxiety and management of General Anxiety Disorder.
 
-### Network diagram showing the relationships between Scotland's AI Strategy and other policies
+### Network diagram showing the relationships between Scotland's AI Strategy and other policies {data-commentary-width=500}
 
 ```{r network-diagram}
 node_list <- read.csv("/home/chantel/pCloudDrive/MSc Health Data Science/PU5919 Evaluating Policy Effects in Practice/Network Analysis data - manual/node_list.csv",
