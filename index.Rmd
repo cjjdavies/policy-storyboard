@@ -35,6 +35,10 @@ output:
   background: #758A0C;
 }
 
+.intro {
+  font-size: 1.5rem;
+}
+
 p {
   font-family: Roboto;
   font-size: 1rem;
@@ -57,6 +61,53 @@ library(plotly)
 library(stringr)
 library(DT)
 library(DiagrammeR)
+library(showtext)
+library(waffle)
+library(hrbrthemes)
+
+font_add(family = "FontAwesome5Free-Solid", regular = "/home/chantel/R/x86_64-pc-linux-gnu-library/4.2/waffle/fonts/fa-solid-900.ttf")
+font_add(family = "FontAwesome5Free-Regular", regular = "/home/chantel/R/x86_64-pc-linux-gnu-library/4.2/waffle/fonts/fa-regular-400.ttf")
+font_add(family = "FontAwesome5Brands-Regular", regular = "/home/chantel/R/x86_64-pc-linux-gnu-library/4.2/waffle/fonts/fa-brands-400.ttf")
+
+showtext_auto()
+
+### MENTAL HEALTH IN SCOTLAND ###
+
+# Create a data from showing 2020 data on suicide rate for men and women from https://www.scotpho.org.uk/health-wellbeing-and-disease/suicide/data/scottish-trends
+suicides_chart <- data.frame(gender = factor(c("Men", "Women"),
+                                       levels=c("Men", "Women")),
+                             suicide_number = c(575, 230))
+
+# Set scales (percentage) and labels
+scalevalues <- sprintf("%.0f%%",
+                       round(prop.table(suicides_chart$suicide_number)*100, 2))
+
+# Create text labels for the two percentage values
+customtext <- c(paste("Men", '=', scalevalues[1]),
+                paste("Women", '=', scalevalues[2]))
+
+suicide2020 <- ggplot(suicides_chart, aes(label = gender, 
+                 values = suicide_number, 
+                 color = gender)) +
+  geom_pictogram(n_rows = 9, make_proportional = TRUE, size = 11) +
+  scale_color_manual(
+    name = NULL,
+    values = c(
+      `Men` = "#5D085D",
+      Women = "#758A0C"),
+    labels = customtext
+  ) +
+  scale_label_pictogram(
+    name = NULL,
+    values = c(
+      `Men` = "male",
+      Women = "female"), 
+    labels = customtext) +
+  coord_equal() +
+  theme_ipsum_rc(grid="") +
+  theme_enhance_waffle() +
+  theme(legend.key.height = unit(2.25, "line")) +
+  theme(legend.text = element_text(size = 10, hjust = 0, vjust = 0.75))
 
 ### TIMELINE CREATION ###
 # Adapted from https://benalexkeen.com/creating-a-timeline-graphic-using-r-and-ggplot2/
@@ -512,19 +563,64 @@ Sidebar {.sidebar}
 ------
 ![](scotlands_ai_strategy.png){width=100%}
 
-This storyboard explains the development of Scotland's AI Strategy, explores the numerous policies underpinning the strategy.
+Student number: 52198593
 
-It discusses mental health and ethical frameworks.
+Some aspects of this storyboard discuss aspects of mental health that may be distressing. If you feel upset or need someone to talk to, please contact the following in the UK:
 
-Welcome to this storyboard, which has been designed to provide an overview of the ethical frameworks in place or in development to guide the use of artificial intelligence in mental health care and research.
+[Samaritans - Scotland](https://www.samaritans.org/?nation=scotland): Call 116 123 - calls are free and available 24/7
 
-Should AI be used for this purpose?
+If you are able, contact your GP for help.
 
-### Mental Health in Sotland
+### Introduction
 
-Situation of mental health and indicators
+<div class="intro">
 
-### Strategy Development and Progress
+Welcome to this storyboard, which has been designed to present an overview of [Scotland's AI Strategy](https://www.scotlandaistrategy.com/) and plans for the use of artificial intelligence in Scotland.
+
+Mental health is an important aspect of everybody's life. These days there are many chatbots and digital apps that claim to be able to help people manage their mental health, but are they safe and effective?
+
+The use of any kind of AI in mental health research and care carries considerable ethical concerns and unique risks. This storyboard considers the specific use of chatbots for managing mental health, and investigates the adequacy of ethical frameworks identified within the Strategy.
+
+This storyboard presents the stages involved in the development of Scotland's AI Strategy, which was published in March 2021, and activities that have occurred since publication.
+This Strategy is part of the Scottish Government's ongoing efforts to become 'digital nation' and is linked to more than 20 other policies and strategies, which can be explored in further detail via an interactive network diagram.
+
+Some parts of this storyboard are interactive and can be explored in your browser.
+
+Links to referenced policies and organisations can be found in the Policy Reference Table at the end of the storyboard.
+
+### What is 'mental health'? {data-commentary-width=400}
+
+![Diagram of the bio-psycho-social model of health, by Seth Falco, 2016; <a href="https://creativecommons.org/licenses/by-sa/4.0" title="Creative Commons Attribution-Share Alike 4.0">CC BY-SA 4.0</a>. This image has not been altered from the original.](Biopsychosocial_Model_of_Health_1.png){#fig-biopsychosocial width="50%"}
+
+***
+At the most fundamental level, mental health is seen as an interaction of biological, physical and social factors, known as the 'bio-psycho-social' model.
+
+This model was first proposed by George Engel in 1977 as an effort to improve understanding of the different aspects of a person can influence good or poor mental health.
+
+### Mental health in Scotland {data-commentary-width=400}
+
+::: {layout-ncol=1}
+
+![](health-boards-map.png){width="75%"}
+
+![](waffle-plot_suicide2020.png){width="100%"}
+:::
+
+***
+
+Within Europe, Scotland has the highest rate of 'excess mortality', otherwise known as unexplained mortality, of approximately 5000 people per year. Premature excess mortality - deaths of people under the age of 65 years - have been attributed to alcohol, drugs, suicide and violence. These deaths cannot be explained by deprivation or socio-economic environment.
+
+In Scotland and the rest of the UK, different scales are used to measure well-being and potential mental health problems. One type of scale is the General Health Questionnaire (GHQ). The GHQ-12 scale uses scores from 0 to 12, with a score of 4 or more indicative of possible psychiatric disorders.
+
+Aggregated scores from 2016-2017 revealed that 17% of people in Scotland aged 16 years and over reported a GHQ score of 4 or more. The map of health boards of Scotland shows Glasgow (with a red arrow), whose population has a higher score than the rest of Scotland: 20% of people reported a GHQ-12 score of 4 or more.
+
+Data from [The Scottish Health Survey, 2022](https://scotland.shinyapps.io/sg-scottish-health-survey/)
+
+In 2020 there were 805 probable suicides registered in Scotland. The 'waffle' plot below the map of Scotland illustrates the difference between men: 575 people, or 71%; and women: 230 people, or 29%.
+
+Data from [The Scottish Public Health Observatory, 2022](https://www.scotpho.org.uk/health-wellbeing-and-disease/suicide/data/scottish-trends)
+
+### Development of Scotland's AI Strategy and progress to date
 
 ```{r timeline}
 ggplotly(timeline_plot, tooltip = "text")
@@ -545,41 +641,29 @@ Information and navigation
 
 - Clicking one any of the 'Milestones' types in the legend will remove those types from the timeline allowing you to focus on specific types; clicking twice will remove all other types from the timeline
 
-### Apps for mental health care {data-commentary-width=400}
+### Apps for managing mental health and sleep patterns {data-commentary-width=500}
 
-```{r}
-mermaid("
-graph TB
-    A(Mental Health Apps) --> B(UB-OK/ Alli-chat)
-    B --> C(Mental & physical <br> health)
-    C --> D(AI-based)
-    C --> E(Therapeutic <br> conversation)
-    D --> F(Natural <br> language <br> understanding?)
-    A --> G(Daylight)
-    G --> H(Worry <br> Anxiety <br> Management of <br> General Anxiety Disorder)
-    H --> I(Fully automated)
-    H --> J(Based on CBT)
-    A --> K(Sleepio)
-    K --> L(Insomnia)
-    L --> M(AI-based)
-    L --> N(Tailored CBT for <br> insomnia: CBT-I)
-    N --> O(Six-week self-help <br> programme)
-    J --> P(Six-week self-help <br> programme)
-    E --> Q(Ongoing interaction)
-")
-```
+![](appdiagram.png)
 
 ***
 
 This diagram provides a summary of three apps for supporting different aspects of good mental health in the general population.
 
-The <a href="https://www.ubok.app/">UB-OK</a> app uses AI to provide therapeutic conversations on an ongoing basis. Its predecessor, Alli-chat, used an algorithm known as natural language understanding - a form of AI that aims to create 'natural' conversation by recognising speech in the form of text and generating an appropriate response.
+The Strategy contains a case study on 'Alli-chat' - a chatbot supported by the Scottish Government to help young people manage their mental health. This app may have been re-designed and launched as <a href="https://www.ubok.app/">'UB-OK'</a>.
+
+The UB-OK app uses AI to provide therapeutic conversations on an ongoing basis. Its predecessor, Alli-chat, uses an algorithm known as natural language understanding - a form of AI that aims to create 'natural' conversation by recognising speech in the form of text and generating an appropriate response.
 
 The apps <a href="https://www.trydaylight.com/">Daylight</a> and <a href="https://onboarding.sleepio.com/sleepio/nhs-sleepio/171#1/1">Sleepio</a> are both freely available for anyone in Scotland. Both apps are promoted by NHS Scotland and use Cognitive Behavioural Therapy approaches over a six-week period to help people manage anxiety and sleep difficulties respectively.
 
 Sleepio is based on AI to deliver tailored guidance on improving sleep patterns.
 
 Daylight has a 'fully automated' approach to providing guided CBT for worry, anxiety and management of General Anxiety Disorder.
+
+An algorithm known as 'Natural Language Understanding' has been used in Alli-chat. This type of algorithm required large amounts of text to provide responses to text inputs from a user, based on a process known as 'pattern-matching'. In short, it uses text in its database to determine the most likely response to a phrase or query.
+
+However, human language is very complex. Words may have different meanings depending on the context of how they are used in a sentence. This can lead to errors in responses from AI. These errors may be confusing or even distressing to some people, particularly children, who may not be aware of these problems and lack the emotional resources to manage inappropriate responses.
+
+None of these apps are recommended for people with mental illness, and serious mental health problems, such as General Anxiety Disorder, despite the Daylight app stating this on the website. These apps are also not recommended for people in crisis or distress.
 
 ### Network diagram showing the relationships between Scotland's AI Strategy and other policies {data-commentary-width=500}
 
@@ -593,7 +677,9 @@ edge_list <- read.csv("/home/chantel/pCloudDrive/MSc Health Data Science/PU5919 
                       header = T,
                       sep = ",")
 
-visNetwork(node_list, edge_list, height = "500px", width = "100%") %>% 
+visNetwork(node_list, edge_list, height = "500px", width = "100%",
+           main = list(text = "Interactive network diagram showing relationships between key policies based on references to 'ethics', 'mental health' and 'AI'",
+           style = "font-family: Roboto; font-size:1.25rem; text-align:center")) %>% 
   visEdges(arrows = "to",
            width = "weight") %>% 
   visGroups(groupname = "AI", shape = "square", color = list(border = "#648FFF", background = "#648FFF")) %>% 
