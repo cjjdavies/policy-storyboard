@@ -593,6 +593,8 @@ Links to referenced policies and organisations can be found in the Policy Refere
 ![Diagram of the bio-psycho-social model of health, by Seth Falco, 2016; <a href="https://creativecommons.org/licenses/by-sa/4.0" title="Creative Commons Attribution-Share Alike 4.0">CC BY-SA 4.0</a>. This image has not been altered from the original.](Biopsychosocial_Model_of_Health_1.png){#fig-biopsychosocial width="50%"}
 
 ***
+Mental health refers to cognitive, behavioral, and emotional well-being.
+
 At the most fundamental level, mental health is seen as an interaction of biological, physical and social factors, known as the 'bio-psycho-social' model.
 
 This model was first proposed by George Engel in 1977 as an effort to improve understanding of the different aspects of a person can influence good or poor mental health.
@@ -601,9 +603,11 @@ This model was first proposed by George Engel in 1977 as an effort to improve un
 
 ::: {layout-ncol=1}
 
-![](health-boards-map.png){width="75%"}
+![](health-boards-map.png){width="90%"}
 
-![](waffle-plot_suicide2020.png){width="100%"}
+-----
+
+![Waffle plot showing the proportion of probable suicides for men and women in Scotland registered in 2020](waffle-plot_suicide2020.png){width="100%"}
 :::
 
 ***
@@ -732,3 +736,13 @@ Information and navigation
 - Documents are organised according to Key Theme, but can be organised by policy title.
 
 - The search box allows for text searches.
+
+### Summary of the Strategy's guidance on ethical frameworks for the use of AI
+
+![](spiderman_meme.jpg)
+
+***
+
+Scotland's AI Strategy aims to be promoting AI for Scotland that is 'trustworthy, ethical and inclusive'.
+
+It is difficult to identify practical guidance on ethical frameworks for AI as the Strategy points to other documents, which in turn reference other documents in a circular referencing system, as illustrated by this Spiderman meme.
